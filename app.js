@@ -100,7 +100,7 @@ app.listen(PORT, () => {
 
     console.log("=======================================");
     console.log(`🚀 Server Started on Port ${PORT}`);
-    console.log("Scheduler : Every 5 Minutes");
+    console.log("Scheduler : Every 30 Minutes");
     console.log("=======================================");
 
 });
