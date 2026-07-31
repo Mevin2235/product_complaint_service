@@ -2,32 +2,26 @@ require("dotenv").config();
 
 const authMiddleware = (req, res, next) => {
     try {
-        // Read headers
-        const username = req.header("Username");
-        const password = req.header("Password");
+        const apiKey = req.header("x-api-key");
 
-        // Check if headers are present
-        if (!username || !password) {
+        if (!apiKey) {
             return res.status(401).json({
                 success: false,
-                message: "Authentication headers are required."
+                message: "API Key is required."
             });
         }
 
-        // Validate credentials
-        if (
-            username !== process.env.API_USERNAME ||
-            password !== process.env.API_PASSWORD
-        ) {
+        if (apiKey !== process.env.API_KEY) {
             return res.status(401).json({
                 success: false,
-                message: "Invalid username or password."
+                message: "Invalid API Key."
             });
         }
 
         next();
+
     } catch (error) {
-        console.error("Authentication Error:", error.message);
+        console.error("Authentication Error:", error);
 
         return res.status(500).json({
             success: false,
