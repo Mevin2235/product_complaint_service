@@ -175,11 +175,6 @@ class SyncService {
             successCount,
 
             failedCount,
-
-            successRecords,
-
-            failedRecords
-
         };
 
     } catch (error) {
