@@ -200,10 +200,25 @@ class SyncService {
 // ==================================================
 // Build Payload Only (No POST)
 // ==================================================
+// ==================================================
+// Build Payload Only (No POST)
+// ==================================================
 async buildPayloads() {
 
     const completedRequests =
         await c4cService.getCompletedServiceRequests();
+
+    // STOP HERE
+    if (!completedRequests.length) {
+
+        console.log("==========================================");
+        console.log("NO COMPLETED SERVICE REQUESTS");
+        console.log("SKIPPING SERVICE REQUEST ITEMS");
+        console.log("==========================================");
+
+        return [];
+
+    }
 
     const requestItems =
         await c4cService.getServiceRequestItems();
@@ -222,7 +237,6 @@ async buildPayloads() {
 
         payloads.push({
 
-            // Header
             ID: request.ID,
             BuyerPartyID: request.BuyerPartyID,
             BuyerPartyName: request.BuyerPartyName,
@@ -233,7 +247,6 @@ async buildPayloads() {
             ServiceExecutionTeamPartyID: request.ServiceExecutionTeamPartyID,
             LastChangeDateTime: request.LastChangeDateTime,
 
-            // Child Items
             ToServiceRequestItems: items.map(item => ({
                 ServiceRequestID: request.ID,
                 ProductID: item.ProductID,
