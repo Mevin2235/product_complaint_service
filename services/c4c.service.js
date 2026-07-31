@@ -27,12 +27,7 @@ async getAllPages(apiUrl) {
         console.log(`\n--------------- PAGE ${page} ---------------`);
         console.log(`URL : ${nextUrl}`);
 
-        const response = await c4cClient.get(nextUrl, {
-            params: {
-                "$format": "json"
-            }
-        });
-
+        const response = await c4cClient.get(nextUrl);
         const pageResults =
             response.data?.d?.results ||
             response.data?.d?.entries ||
@@ -84,6 +79,9 @@ async getAllPages(apiUrl) {
 // ==========================================================
 // Get Newly Completed Service Requests
 // ==========================================================
+// ==========================================================
+// Get Newly Completed Service Requests
+// ==========================================================
 async getCompletedServiceRequests() {
 
     try {
@@ -92,41 +90,35 @@ async getCompletedServiceRequests() {
         console.log("FETCHING SERVICE REQUESTS...");
         console.log("==========================================");
 
-        const results = await this.getAllPages(API.SERVICE_REQUEST);
-
-        console.log(`Total Service Requests : ${results.length}`);
-
         const now = new Date();
         const thirtyMinutesAgo = new Date(now.getTime() - (30 * 60 * 1000));
 
-console.log(`Thirty Minutes Ago : ${thirtyMinutesAgo.toISOString()}`);
+        // Remove milliseconds and keep UTC Z
+        const from =
+            thirtyMinutesAgo.toISOString().split(".")[0] + "Z";
 
-        console.log(`Current Time      : ${now.toISOString()}`);
-        
+        console.log(`From Time : ${from}`);
+        console.log(`Current   : ${now.toISOString()}`);
 
-        const completedRequests = results.filter(item => {
+        // OData Filter
+        const url =
+            `${API.SERVICE_REQUEST}` +
+            `?$format=json` +
+            `&$filter=ServiceRequestLifeCycleStatusCode eq '3'` +
+            ` and LastChangeDateTime ge datetimeoffset'${from}'`;
 
-            const status =
-                item.ServiceRequestLifeCycleStatusCode === "3" ||
-                item.ServiceRequestLifeCycleStatusCode === 3;
+        console.log("------------------------------------------");
+        console.log("FILTER URL");
+        console.log(url);
+        console.log("------------------------------------------");
 
-            if (!status || !item.LastChangeDateTime)
-                return false;
-
-            const changedTime = new Date(item.LastChangeDateTime);
-
-            return (
-    changedTime >= thirtyMinutesAgo &&
-    changedTime < now
-);
-
-        });
+        const results = await this.getAllPages(url);
 
         console.log(
-    `Completed Requests In Last 30 Minutes : ${completedRequests.length}`
-);
+            `Completed Requests Returned By C4C : ${results.length}`
+        );
 
-        return completedRequests;
+        return results;
 
     } catch (error) {
 
