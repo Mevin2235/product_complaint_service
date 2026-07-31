@@ -9,6 +9,7 @@ const cron = require("node-cron");
 
 const syncRoutes = require("./routes/sync.routes");
 const syncService = require("./services/sync.service");
+const authMiddleware = require("./middleware/auth.middleware");
 
 const app = express();
 
@@ -19,7 +20,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ===========================================
-// Health Check
+// Health Check (Public)
 // ===========================================
 app.get("/", (req, res) => {
     res.status(200).json({
@@ -29,12 +30,17 @@ app.get("/", (req, res) => {
 });
 
 // ===========================================
+// Protect ALL API Routes
+// ===========================================
+app.use("/api", authMiddleware);
+
+// ===========================================
 // Routes
 // ===========================================
 app.use("/api/sync", syncRoutes);
 
 // ===========================================
-// Scheduler - Every 5 Minutes
+// Scheduler - Every 30 Minutes
 // ===========================================
 cron.schedule("*/30 * * * *", async () => {
 
@@ -90,10 +96,7 @@ app.use((err, req, res, next) => {
     });
 
 });
-const authMiddleware = require("./middleware/auth.middleware");
 
-// Protect all API routes
-app.use("/api", authMiddleware);
 // ===========================================
 // Start Server
 // ===========================================
