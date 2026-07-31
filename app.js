@@ -12,7 +12,7 @@ const syncService = require("./services/sync.service");
 const authMiddleware = require("./middleware/auth.middleware");
 
 const app = express();
-
+require("./cron/sync.cron");
 // ===========================================
 // Middleware
 // ===========================================
