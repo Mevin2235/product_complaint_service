@@ -123,8 +123,8 @@ console.log(`Thirty Minutes Ago : ${thirtyMinutesAgo.toISOString()}`);
         });
 
         console.log(
-            `Completed Requests In Last 5 Minutes : ${completedRequests.length}`
-        );
+    `Completed Requests In Last 30 Minutes : ${completedRequests.length}`
+);
 
         return completedRequests;
 
