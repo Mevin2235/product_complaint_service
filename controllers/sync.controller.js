@@ -7,6 +7,7 @@ const syncService = require("../services/sync.service");
 // POST /api/sync
 // ===========================================
 const runSync = async (req, res) => {
+
     try {
 
         console.log("========================================");
@@ -34,6 +35,47 @@ const runSync = async (req, res) => {
         });
 
     }
+
+};
+
+// ===========================================
+// Background Sync (For Cron Job)
+// POST /api/sync/cron
+// Returns immediately while sync runs
+// ===========================================
+const runCronSync = async (req, res) => {
+
+    // Respond immediately
+    res.status(200).json({
+        success: true,
+        message: "Background Sync Started"
+    });
+
+    // Continue sync in background
+    try {
+
+        console.log("========================================");
+        console.log("BACKGROUND SERVICE REQUEST SYNC STARTED");
+        console.log("========================================");
+
+        const result = await syncService.runSync();
+
+        console.log("========================================");
+        console.log("BACKGROUND SERVICE REQUEST SYNC COMPLETED");
+        console.log(`Total   : ${result.total}`);
+        console.log(`Success : ${result.successCount}`);
+        console.log(`Failed  : ${result.failedCount}`);
+        console.log("========================================");
+
+    } catch (error) {
+
+        console.error("========================================");
+        console.error("BACKGROUND SYNC FAILED");
+        console.error(error.message);
+        console.error("========================================");
+
+    }
+
 };
 
 // ===========================================
@@ -65,5 +107,6 @@ const getPayload = async (req, res) => {
 
 module.exports = {
     runSync,
+    runCronSync,
     getPayload
 };

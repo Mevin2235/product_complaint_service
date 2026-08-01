@@ -5,14 +5,12 @@
 require("dotenv").config();
 
 const express = require("express");
-const cron = require("node-cron");
 
 const syncRoutes = require("./routes/sync.routes");
-const syncService = require("./services/sync.service");
 const authMiddleware = require("./middleware/auth.middleware");
 
 const app = express();
-require("./cron/sync.cron");
+
 // ===========================================
 // Middleware
 // ===========================================
@@ -38,40 +36,6 @@ app.use("/api", authMiddleware);
 // Routes
 // ===========================================
 app.use("/api/sync", syncRoutes);
-
-// ===========================================
-// Scheduler - Every 30 Minutes
-// ===========================================
-cron.schedule("*/30 * * * *", async () => {
-
-    console.log("\n=======================================");
-    console.log("SERVICE REQUEST SCHEDULER STARTED");
-    console.log(`Time : ${new Date().toISOString()}`);
-    console.log("=======================================\n");
-
-    try {
-
-        const result = await syncService.runSync();
-
-        console.log("\n=======================================");
-        console.log("SCHEDULER COMPLETED");
-        console.log("=======================================");
-        console.log(`Total   : ${result.total}`);
-        console.log(`Success : ${result.successCount}`);
-        console.log(`Failed  : ${result.failedCount}`);
-        console.log("=======================================\n");
-
-    } catch (error) {
-
-        console.error("\n=======================================");
-        console.error("SCHEDULER FAILED");
-        console.error("=======================================");
-        console.error(error.message);
-        console.error("=======================================\n");
-
-    }
-
-});
 
 // ===========================================
 // 404 Handler
@@ -106,7 +70,6 @@ app.listen(PORT, () => {
 
     console.log("=======================================");
     console.log(`🚀 Server Started on Port ${PORT}`);
-    console.log("Scheduler : Every 30 Minutes");
     console.log("=======================================");
 
 });
