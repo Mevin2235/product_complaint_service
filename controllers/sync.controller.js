@@ -45,36 +45,40 @@ const runSync = async (req, res) => {
 // ===========================================
 const runCronSync = async (req, res) => {
 
-    // Respond immediately
+    // Return immediately
     res.status(200).json({
         success: true,
         message: "Background Sync Started"
     });
 
-    // Continue sync in background
-    try {
+    // Run in the next event loop
+    setImmediate(async () => {
 
-        console.log("========================================");
-        console.log("BACKGROUND SERVICE REQUEST SYNC STARTED");
-        console.log("========================================");
+        try {
 
-        const result = await syncService.runSync();
+            console.log("========================================");
+            console.log("BACKGROUND SERVICE REQUEST SYNC STARTED");
+            console.log("========================================");
 
-        console.log("========================================");
-        console.log("BACKGROUND SERVICE REQUEST SYNC COMPLETED");
-        console.log(`Total   : ${result.total}`);
-        console.log(`Success : ${result.successCount}`);
-        console.log(`Failed  : ${result.failedCount}`);
-        console.log("========================================");
+            const result = await syncService.runSync();
 
-    } catch (error) {
+            console.log("========================================");
+            console.log("BACKGROUND SERVICE REQUEST SYNC COMPLETED");
+            console.log(`Total   : ${result.total}`);
+            console.log(`Success : ${result.successCount}`);
+            console.log(`Failed  : ${result.failedCount}`);
+            console.log("========================================");
 
-        console.error("========================================");
-        console.error("BACKGROUND SYNC FAILED");
-        console.error(error.message);
-        console.error("========================================");
+        } catch (error) {
 
-    }
+            console.error("========================================");
+            console.error("BACKGROUND SYNC FAILED");
+            console.error(error.message);
+            console.error("========================================");
+
+        }
+
+    });
 
 };
 
