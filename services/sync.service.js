@@ -93,7 +93,7 @@ class SyncService {
     ToServiceRequestItems: items.map(item => ({
 
         // NEW ITEM FIELD
-        ID: item.ID,
+        LineItemID: item.ID,
 
         ServiceRequestID: request.ID,
 
