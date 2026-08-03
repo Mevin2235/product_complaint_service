@@ -4,6 +4,14 @@ const express = require("express");
 const router = express.Router();
 
 const syncController = require("../controllers/sync.controller");
+router.post("/test", (req, res) => {
+
+    res.status(200).json({
+        success: true,
+        message: "Hello Cron Job"
+    });
+
+});
 
 // ==========================================================
 // Service Request Sync
