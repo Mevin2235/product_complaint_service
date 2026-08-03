@@ -70,41 +70,49 @@ class SyncService {
 
             const payload = {
 
-                // -----------------------
-                // Header
-                // -----------------------
-                ID: request.ID,
-                BuyerPartyID: request.BuyerPartyID,
-                BuyerPartyName: request.BuyerPartyName,
-                SalesOrganisationID: request.SalesOrganisationID,
-                DivisionCode: request.DivisionCode,
-                DistributionChannelCode: request.DistributionChannelCode,
-                ServiceExecutionTeamPartyID: request.ServiceExecutionTeamPartyID,
-                CreationDateTime: request.CreationDateTime,
-                LastChangeDateTime: request.LastChangeDateTime,
+    // -----------------------
+    // Header
+    // -----------------------
+    ID: request.ID,
+    BuyerPartyID: request.BuyerPartyID,
+    BuyerPartyName: request.BuyerPartyName,
+    SalesOrganisationID: request.SalesOrganisationID,
+    DivisionCode: request.DivisionCode,
+    DistributionChannelCode: request.DistributionChannelCode,
+    ServiceExecutionTeamPartyID: request.ServiceExecutionTeamPartyID,
 
-                // -----------------------
-                // Child Records
-                // -----------------------
-                ToServiceRequestItems: items.map(item => ({
-                    ServiceRequestID: request.ID,
+    // NEW HEADER FIELD
+    GrandTotalContent_KUT: request.GrandTotalContent_KUT,
 
-                    ProductID: item.ProductID,
+    CreationDateTime: request.CreationDateTime,
+    LastChangeDateTime: request.LastChangeDateTime,
 
-                    Description: item.Description,
+    // -----------------------
+    // Child Records
+    // -----------------------
+    ToServiceRequestItems: items.map(item => ({
 
-                    SettlementMode_KUTText:
-                        item.SettlementMode_KUTText,
+        // NEW ITEM FIELD
+        ID: item.ID,
 
-                    TotalAmountContent_KUT:
-                        item.TotalAmountContent_KUT,
+        ServiceRequestID: request.ID,
 
-                    TotalAmountcurrencyCode_KUT:
-                        item.TotalAmountcurrencyCode_KUT
+        ProductID: item.ProductID,
 
-                }))
+        Description: item.Description,
 
-            };
+        SettlementMode_KUTText:
+            item.SettlementMode_KUTText,
+
+        TotalAmountContent_KUT:
+            item.TotalAmountContent_KUT,
+
+        TotalAmountcurrencyCode_KUT:
+            item.TotalAmountcurrencyCode_KUT
+
+    }))
+
+};
 
             console.log("\n====================================");
             console.log(`POSTING SERVICE REQUEST : ${request.ID}`);
@@ -232,28 +240,41 @@ async buildPayloads() {
 
         payloads.push({
 
-            ID: request.ID,
-            BuyerPartyID: request.BuyerPartyID,
-            BuyerPartyName: request.BuyerPartyName,
-            SalesOrganisationID: request.SalesOrganisationID,
-            DivisionCode: request.DivisionCode,
-            DistributionChannelCode: request.DistributionChannelCode,
-            CreationDateTime: request.CreationDateTime,
-            ServiceExecutionTeamPartyID: request.ServiceExecutionTeamPartyID,
-            LastChangeDateTime: request.LastChangeDateTime,
+    ID: request.ID,
+    BuyerPartyID: request.BuyerPartyID,
+    BuyerPartyName: request.BuyerPartyName,
+    SalesOrganisationID: request.SalesOrganisationID,
+    DivisionCode: request.DivisionCode,
+    DistributionChannelCode: request.DistributionChannelCode,
+    ServiceExecutionTeamPartyID: request.ServiceExecutionTeamPartyID,
 
-            ToServiceRequestItems: items.map(item => ({
-                ServiceRequestID: request.ID,
-                ProductID: item.ProductID,
-                Description: item.Description,
-                SettlementMode_KUTText: item.SettlementMode_KUTText,
-                TotalAmountContent_KUT: item.TotalAmountContent_KUT,
-                TotalAmountcurrencyCode_KUT:
-                    item.TotalAmountcurrencyCode_KUT
-            }))
+    // NEW HEADER FIELD
+    GrandTotalContent_KUT: request.GrandTotalContent_KUT,
 
-        });
+    CreationDateTime: request.CreationDateTime,
+    LastChangeDateTime: request.LastChangeDateTime,
 
+    ToServiceRequestItems: items.map(item => ({
+
+        // NEW ITEM FIELD
+        ID: item.ID,
+
+        ServiceRequestID: request.ID,
+
+        ProductID: item.ProductID,
+
+        Description: item.Description,
+
+        SettlementMode_KUTText: item.SettlementMode_KUTText,
+
+        TotalAmountContent_KUT: item.TotalAmountContent_KUT,
+
+        TotalAmountcurrencyCode_KUT:
+            item.TotalAmountcurrencyCode_KUT
+
+    }))
+
+});
     }
 
     return payloads;
