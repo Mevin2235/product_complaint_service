@@ -10,7 +10,7 @@ class SyncService {
     // ==================================================
     // Main Sync Method
     // ==================================================
-    async runSync() {
+async runSync() {
 
     try {
 
@@ -49,70 +49,90 @@ class SyncService {
         const failedRecords = [];
 
         // ==========================================
-        // Process ONE Service Request at a time
+        // Process One Service Request
         // ==========================================
 
         for (const request of completedRequests) {
 
-            // Find matching items
             const items = requestItems.filter(
                 item => item.ServiceRequestID == request.ID
             );
 
             if (!items.length) {
+
                 console.log(`No Items Found for Service Request ${request.ID}`);
                 continue;
+
             }
 
             // ==========================================
-            // Build Payload
+            // Build Flat Payload
             // ==========================================
 
-            const payload = {
+            const payload = [];
 
-    // -----------------------
-    // Header
-    // -----------------------
-    ID: request.ID,
-    BuyerPartyID: request.BuyerPartyID,
-    BuyerPartyName: request.BuyerPartyName,
-    SalesOrganisationID: request.SalesOrganisationID,
-    DivisionCode: request.DivisionCode,
-    DistributionChannelCode: request.DistributionChannelCode,
-    ServiceExecutionTeamPartyID: request.ServiceExecutionTeamPartyID,
+            for (const item of items) {
 
-    // NEW HEADER FIELD
-    GrandTotalContent_KUT: request.GrandTotalContent_KUT,
+                // Skip Commercial Settlement
+                if (item.SettlementMode_KUTText === "Commercial Settlement (CN)") {
 
-    CreationDateTime: request.CreationDateTime,
-    LastChangeDateTime: request.LastChangeDateTime,
+                    console.log(
+                        `Skipping Item ${item.ID} - Commercial Settlement (CN)`
+                    );
 
-    // -----------------------
-    // Child Records
-    // -----------------------
-    ToServiceRequestItems: items.map(item => ({
+                    continue;
 
-        // NEW ITEM FIELD
-        LineItemID: item.ID,
+                }
 
-        ServiceRequestID: request.ID,
+                payload.push({
 
-        ProductID: item.ProductID,
+                    Requestno: request.ID,
 
-        Description: item.Description,
+                    // Line Item ID
+                    SeqNo: item.ID,
 
-        SettlementMode_KUTText:
-            item.SettlementMode_KUTText,
+                    Bp: request.BuyerPartyID,
 
-        TotalAmountContent_KUT:
-            item.TotalAmountContent_KUT,
+                    TotalAmount: request.GrandTotalContent_KUT,
 
-        TotalAmountcurrencyCode_KUT:
-            item.TotalAmountcurrencyCode_KUT
+                    TotCurrency: request.GrandTotalcurrencyCode_KUT,
 
-    }))
+                    DistriChannel: request.DistributionChannelCode,
 
-};
+                    Division: request.DivisionCode,
+
+                    CreationDate: request.CreationDateTime,
+
+                    ChangedDate: request.LastChangeDateTime,
+
+                    Plant: request.ServiceExecutionTeamPartyID.replace("PLANT_", ""),
+
+                    SalesOrg: request.SalesOrganisationID.replace("SO_", ""),
+
+                    Product: item.ProductID,
+
+                    Description: item.Description,
+
+                    Settlement: item.SettlementMode_KUTText,
+
+                    Amount: item.TotalAmountContent_KUT,
+
+                    Currency: item.TotalAmountcurrencyCode_KUT
+
+                });
+
+            }
+
+            // Skip if all items were Commercial Settlement
+            if (payload.length === 0) {
+
+                console.log(
+                    `No Valid Items Found for Service Request ${request.ID}`
+                );
+
+                continue;
+
+            }
 
             console.log("\n====================================");
             console.log(`POSTING SERVICE REQUEST : ${request.ID}`);
@@ -131,9 +151,7 @@ class SyncService {
                 successRecords.push({
 
                     ServiceRequestID: request.ID,
-
                     Status: "SUCCESS",
-
                     Response: response.data
 
                 });
@@ -147,9 +165,7 @@ class SyncService {
                 failedRecords.push({
 
                     ServiceRequestID: request.ID,
-
                     Status: "FAILED",
-
                     Error: error.response?.data || error.message
 
                 });
@@ -167,22 +183,16 @@ class SyncService {
         console.log("\n====================================");
         console.log("SYNC COMPLETED");
         console.log("====================================");
-
-        console.log(`Total Requests : ${completedRequests.length}`);
-        console.log(`Success Count  : ${successCount}`);
-        console.log(`Failed Count   : ${failedCount}`);
+        console.log(`Success Count : ${successCount}`);
+        console.log(`Failed Count  : ${failedCount}`);
 
         return {
 
             success: true,
-
             message: "Service Request Sync Completed",
-
-            total: completedRequests.length,
-
             successCount,
+            failedCount
 
-            failedCount,
         };
 
     } catch (error) {
@@ -211,12 +221,10 @@ async buildPayloads() {
     const completedRequests =
         await c4cService.getCompletedServiceRequests();
 
-    // STOP HERE
     if (!completedRequests.length) {
 
         console.log("==========================================");
         console.log("NO COMPLETED SERVICE REQUESTS");
-        console.log("SKIPPING SERVICE REQUEST ITEMS");
         console.log("==========================================");
 
         return [];
@@ -228,6 +236,10 @@ async buildPayloads() {
 
     const payloads = [];
 
+    // ==========================================
+    // Build Flat Payload
+    // ==========================================
+
     for (const request of completedRequests) {
 
         const items = requestItems.filter(
@@ -238,46 +250,61 @@ async buildPayloads() {
             continue;
         }
 
-        payloads.push({
+        for (const item of items) {
 
-    ID: request.ID,
-    BuyerPartyID: request.BuyerPartyID,
-    BuyerPartyName: request.BuyerPartyName,
-    SalesOrganisationID: request.SalesOrganisationID,
-    DivisionCode: request.DivisionCode,
-    DistributionChannelCode: request.DistributionChannelCode,
-    ServiceExecutionTeamPartyID: request.ServiceExecutionTeamPartyID,
+            // Skip Commercial Settlement
+            if (item.SettlementMode_KUTText === "Commercial Settlement (CN)") {
 
-    // NEW HEADER FIELD
-    GrandTotalContent_KUT: request.GrandTotalContent_KUT,
+                console.log(
+                    `Skipping Item ${item.ID} - Commercial Settlement (CN)`
+                );
 
-    CreationDateTime: request.CreationDateTime,
-    LastChangeDateTime: request.LastChangeDateTime,
+                continue;
 
-    ToServiceRequestItems: items.map(item => ({
+            }
 
-        // NEW ITEM FIELD
-        ID: item.ID,
+            payloads.push({
 
-        ServiceRequestID: request.ID,
+                Requestno: request.ID,
 
-        ProductID: item.ProductID,
+                // Line Item ID
+                SeqNo: item.ID,
 
-        Description: item.Description,
+                Bp: request.BuyerPartyID,
 
-        SettlementMode_KUTText: item.SettlementMode_KUTText,
+                TotalAmount: request.GrandTotalContent_KUT,
 
-        TotalAmountContent_KUT: item.TotalAmountContent_KUT,
+                TotCurrency: request.GrandTotalcurrencyCode_KUT,
 
-        TotalAmountcurrencyCode_KUT:
-            item.TotalAmountcurrencyCode_KUT
+                DistriChannel: request.DistributionChannelCode,
 
-    }))
+                Division: request.DivisionCode,
 
-});
+                CreationDate: request.CreationDateTime,
+
+                ChangedDate: request.LastChangeDateTime,
+
+                Plant: request.ServiceExecutionTeamPartyID.replace("PLANT_", ""),
+
+                SalesOrg: request.SalesOrganisationID.replace("SO_", ""),
+
+                Product: item.ProductID,
+
+                Description: item.Description,
+
+                Settlement: item.SettlementMode_KUTText,
+
+                Amount: item.TotalAmountContent_KUT,
+
+                Currency: item.TotalAmountcurrencyCode_KUT
+
+            });
+
+        }
+
     }
 
     return payloads;
+
 }
 }
-module.exports = new SyncService();
