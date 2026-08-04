@@ -308,3 +308,4 @@ async buildPayloads() {
 
 }
 }
+module.exports = new SyncService();
