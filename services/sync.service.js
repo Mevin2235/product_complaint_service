@@ -318,7 +318,7 @@ async testRunSync() {
         console.log("TEST SYNC STARTED");
         console.log("==========================================");
 
-        // Fetch ALL completed requests
+        // Fetch ALL completed Service Requests
         const completedRequests =
             await c4cService.getAllCompletedServiceRequests();
 
@@ -326,77 +326,134 @@ async testRunSync() {
 
             return {
                 success: true,
-                total: 0,
-                payload: []
+                message: "No Completed Service Requests Found",
+                total: 0
             };
 
         }
 
+        // Fetch all Service Request Items
         const requestItems =
             await c4cService.getServiceRequestItems();
 
-        const payload = [];
+        // ==========================================
+        // Take ONLY the first Service Request
+        // ==========================================
+        const request = completedRequests[0];
 
-        for (const request of completedRequests) {
+        console.log(`Testing Service Request : ${request.ID}`);
 
-            const items = requestItems.filter(
-                item => item.ServiceRequestID == request.ID
-            );
+        const items = requestItems.filter(
+            item => item.ServiceRequestID == request.ID
+        );
 
-            for (const item of items) {
+        if (!items.length) {
 
-                // Skip Commercial Settlement
-                if (item.SettlementMode_KUTText === "Commercial Settlement (CN)") {
-                    continue;
-                }
-
-                payload.push({
-
-                    Requestno: request.ID,
-
-                    SeqNo: item.ID,
-
-                    Bp: request.BuyerPartyID,
-
-                    TotalAmount: request.GrandTotalContent_KUT,
-
-                    TotCurrency: request.GrandTotalcurrencyCode_KUT,
-
-                    DistriChannel: request.DistributionChannelCode,
-
-                    Division: request.DivisionCode,
-
-                    CreationDate: request.CreationDateTime,
-
-                    ChangedDate: request.LastChangeDateTime,
-
-                    Plant: request.ServiceExecutionTeamPartyID.replace("PLANT_", ""),
-
-                    SalesOrg: request.SalesOrganisationID.replace("SO_", ""),
-
-                    Product: item.ProductID,
-
-                    Description: item.Description,
-
-                    Settlement: item.SettlementMode_KUTText,
-
-                    Amount: item.TotalAmountContent_KUT,
-
-                    Currency: item.TotalAmountcurrencyCode_KUT
-
-                });
-
-            }
+            return {
+                success: false,
+                message: `No Items Found for Service Request ${request.ID}`
+            };
 
         }
 
-        return {
-            success: true,
-            total: payload.length,
+        const payload = [];
+
+        for (const item of items) {
+
+            // Skip Commercial Settlement
+            if (item.SettlementMode_KUTText === "Commercial Settlement (CN)") {
+
+                console.log(
+                    `Skipping Item ${item.ID} - Commercial Settlement (CN)`
+                );
+
+                continue;
+
+            }
+
+            payload.push({
+
+                Requestno: request.ID,
+
+                SeqNo: item.ID,
+
+                Bp: request.BuyerPartyID,
+
+                TotalAmount: request.GrandTotalContent_KUT,
+
+                TotCurrency: request.GrandTotalcurrencyCode_KUT,
+
+                DistriChannel: request.DistributionChannelCode,
+
+                Division: request.DivisionCode,
+
+                CreationDate: request.CreationDateTime,
+
+                ChangedDate: request.LastChangeDateTime,
+
+                Plant: request.ServiceExecutionTeamPartyID.replace("PLANT_", ""),
+
+                SalesOrg: request.SalesOrganisationID.replace("SO_", ""),
+
+                Product: item.ProductID,
+
+                Description: item.Description,
+
+                Settlement: item.SettlementMode_KUTText,
+
+                Amount: item.TotalAmountContent_KUT,
+
+                Currency: item.TotalAmountcurrencyCode_KUT
+
+            });
+
+        }
+
+        if (!payload.length) {
+
+            return {
+                success: false,
+                message: "All Items are Commercial Settlement (CN)"
+            };
+
+        }
+
+        console.log("\n====================================");
+        console.log(`POSTING SERVICE REQUEST : ${request.ID}`);
+        console.log("====================================");
+        console.log(JSON.stringify(payload, null, 2));
+
+        const response = await postClient.post(
+            API.POST_SERVICE_REQUEST,
             payload
+        );
+
+        console.log("\n====================================");
+        console.log("POST SUCCESS");
+        console.log("====================================");
+
+        return {
+
+            success: true,
+            message: "Test Sync Completed",
+
+            requestNo: request.ID,
+
+            totalItems: payload.length,
+
+            response: response.data
+
         };
 
     } catch (error) {
+
+        console.log("\n====================================");
+        console.log("TEST SYNC FAILED");
+        console.log("====================================");
+
+        console.error(
+            error.response?.data || error.message
+        );
 
         throw error;
 
