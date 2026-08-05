@@ -141,11 +141,12 @@ async runSync() {
 
             try {
 
-                const response = await postClient.post(
-                    API.POST_SERVICE_REQUEST,
-                    payload
-                );
-
+               const response = await postClient.post(
+    API.POST_SERVICE_REQUEST,
+    {
+        items: payload
+    }
+);
                 successCount++;
 
                 successRecords.push({
