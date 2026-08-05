@@ -336,84 +336,101 @@ async testRunSync() {
         const requestItems =
             await c4cService.getServiceRequestItems();
 
+        let request = null;
+        let payload = [];
+
         // ==========================================
-        // Take ONLY the first Service Request
+        // Find FIRST Service Request having valid items
         // ==========================================
-        const request = completedRequests[0];
 
-        console.log(`Testing Service Request : ${request.ID}`);
+        for (const req of completedRequests) {
 
-        const items = requestItems.filter(
-            item => item.ServiceRequestID == request.ID
-        );
+            console.log(`Checking Service Request : ${req.ID}`);
 
-        if (!items.length) {
+            const items = requestItems.filter(
+                item => item.ServiceRequestID == req.ID
+            );
 
-            return {
-                success: false,
-                message: `No Items Found for Service Request ${request.ID}`
-            };
+            if (!items.length) {
 
-        }
-
-        const payload = [];
-
-        for (const item of items) {
-
-            // Skip Commercial Settlement
-            if (item.SettlementMode_KUTText === "Commercial Settlement (CN)") {
-
-                console.log(
-                    `Skipping Item ${item.ID} - Commercial Settlement (CN)`
-                );
-
+                console.log(`No Items Found for ${req.ID}`);
                 continue;
 
             }
 
-            payload.push({
+            const tempPayload = [];
 
-                Requestno: request.ID,
+            for (const item of items) {
 
-                SeqNo: item.ID,
+                // Skip Commercial Settlement
+                if (item.SettlementMode_KUTText === "Commercial Settlement (CN)") {
 
-                Bp: request.BuyerPartyID,
+                    console.log(
+                        `Skipping Item ${item.ID} - Commercial Settlement (CN)`
+                    );
 
-                TotalAmount: request.GrandTotalContent_KUT,
+                    continue;
 
-                TotCurrency: request.GrandTotalcurrencyCode_KUT,
+                }
 
-                DistriChannel: request.DistributionChannelCode,
+                tempPayload.push({
 
-                Division: request.DivisionCode,
+                    Requestno: req.ID,
 
-                CreationDate: request.CreationDateTime,
+                    SeqNo: item.ID,
 
-                ChangedDate: request.LastChangeDateTime,
+                    Bp: req.BuyerPartyID,
 
-                Plant: request.ServiceExecutionTeamPartyID.replace("PLANT_", ""),
+                    TotalAmount: req.GrandTotalContent_KUT,
 
-                SalesOrg: request.SalesOrganisationID.replace("SO_", ""),
+                    TotCurrency: req.GrandTotalcurrencyCode_KUT,
 
-                Product: item.ProductID,
+                    DistriChannel: req.DistributionChannelCode,
 
-                Description: item.Description,
+                    Division: req.DivisionCode,
 
-                Settlement: item.SettlementMode_KUTText,
+                    CreationDate: req.CreationDateTime,
 
-                Amount: item.TotalAmountContent_KUT,
+                    ChangedDate: req.LastChangeDateTime,
 
-                Currency: item.TotalAmountcurrencyCode_KUT
+                    Plant: req.ServiceExecutionTeamPartyID.replace("PLANT_", ""),
 
-            });
+                    SalesOrg: req.SalesOrganisationID.replace("SO_", ""),
+
+                    Product: item.ProductID,
+
+                    Description: item.Description,
+
+                    Settlement: item.SettlementMode_KUTText,
+
+                    Amount: item.TotalAmountContent_KUT,
+
+                    Currency: item.TotalAmountcurrencyCode_KUT
+
+                });
+
+            }
+
+            // If at least one valid item exists, stop here
+            if (tempPayload.length > 0) {
+
+                request = req;
+                payload = tempPayload;
+                break;
+
+            }
+
+            console.log(
+                `All Items are Commercial Settlement for ${req.ID}`
+            );
 
         }
 
-        if (!payload.length) {
+        if (!request) {
 
             return {
                 success: false,
-                message: "All Items are Commercial Settlement (CN)"
+                message: "No Valid Service Request Found."
             };
 
         }
@@ -435,6 +452,7 @@ async testRunSync() {
         return {
 
             success: true,
+
             message: "Test Sync Completed",
 
             requestNo: request.ID,
