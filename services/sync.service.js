@@ -440,10 +440,12 @@ async testRunSync() {
         console.log("====================================");
         console.log(JSON.stringify(payload, null, 2));
 
-        const response = await postClient.post(
-            API.POST_SERVICE_REQUEST,
-            payload
-        );
+ const response = await postClient.post(
+    API.POST_SERVICE_REQUEST,
+    {
+        items: payload
+    }
+);
 
         console.log("\n====================================");
         console.log("POST SUCCESS");
