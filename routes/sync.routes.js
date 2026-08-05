@@ -13,7 +13,7 @@ router.post("/test", (req, res) => {
 
 });
 // Test All Completed Requests (No Date Filter)
-router.get("/test-all", syncController.testAllSync);
+router.post("/test-all", syncController.testAllSync);
 
 // ==========================================================
 // Service Request Sync
