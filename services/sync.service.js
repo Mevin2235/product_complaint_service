@@ -74,16 +74,17 @@ async runSync() {
             for (const item of items) {
 
                 // Skip Commercial Settlement
-                if (item.SettlementMode_KUTText === "Commercial Settlement (CN)") {
+                // Post ONLY Commercial Settlement (CN)
+// Post ONLY Settlement Mode 101
+if (item.SettlementMode_KUT !== "101") {
 
-                    console.log(
-                        `Skipping Item ${item.ID} - Commercial Settlement (CN)`
-                    );
+    console.log(
+        `Skipping Item ${item.ID} - Settlement Code ${item.SettlementMode_KUT}`
+    );
 
-                    continue;
+    continue;
 
-                }
-
+}
                 payload.push({
 
                     Requestno: request.ID,
@@ -254,15 +255,17 @@ async buildPayloads() {
         for (const item of items) {
 
             // Skip Commercial Settlement
-            if (item.SettlementMode_KUTText === "Commercial Settlement (CN)") {
+          // Post ONLY Commercial Settlement (CN)
+// Post ONLY Settlement Mode 101
+if (item.SettlementMode_KUT !== "101") {
 
-                console.log(
-                    `Skipping Item ${item.ID} - Commercial Settlement (CN)`
-                );
+    console.log(
+        `Skipping Item ${item.ID} - Settlement Code ${item.SettlementMode_KUT}`
+    );
 
-                continue;
+    continue;
 
-            }
+}
 
             payloads.push({
 
@@ -364,15 +367,17 @@ async testRunSync() {
             for (const item of items) {
 
                 // Skip Commercial Settlement
-                if (item.SettlementMode_KUTText === "Commercial Settlement (CN)") {
+                // Post ONLY Commercial Settlement (CN)
+// Post ONLY Settlement Mode 101
+if (item.SettlementMode_KUT !== "101") {
 
-                    console.log(
-                        `Skipping Item ${item.ID} - Commercial Settlement (CN)`
-                    );
+    console.log(
+        `Skipping Item ${item.ID} - Settlement Code ${item.SettlementMode_KUT}`
+    );
 
-                    continue;
+    continue;
 
-                }
+}
 
                 tempPayload.push({
 
