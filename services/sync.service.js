@@ -444,7 +444,7 @@ async testRunSync() {
  const response = await postClient.post(
     API.POST_SERVICE_REQUEST,
     {
-        items: payload
+        ToServiceRequestID: payload
     }
 );
 
