@@ -220,6 +220,47 @@ async getPayloadData() {
     }));
 
 }
+// ==========================================================
+// Get ALL Completed Service Requests (Testing - No Date Filter)
+// ==========================================================
+async getAllCompletedServiceRequests() {
+
+    try {
+
+        console.log("==========================================");
+        console.log("FETCHING ALL COMPLETED SERVICE REQUESTS...");
+        console.log("==========================================");
+
+        const url =
+            `${API.SERVICE_REQUEST}` +
+            `?$format=json` +
+            `&$filter=ServiceRequestLifeCycleStatusCode eq '3'`;
+
+        console.log("------------------------------------------");
+        console.log("FILTER URL");
+        console.log(url);
+        console.log("------------------------------------------");
+
+        const results = await this.getAllPages(url);
+
+        console.log(
+            `Completed Requests Returned By C4C : ${results.length}`
+        );
+
+        return results;
+
+    } catch (error) {
+
+        console.error("==========================================");
+        console.error("ERROR FETCHING ALL SERVICE REQUESTS");
+        console.error(error.response?.data || error.message);
+        console.error("==========================================");
+
+        throw error;
+
+    }
+
+}
 
 }
 

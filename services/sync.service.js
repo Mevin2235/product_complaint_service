@@ -307,5 +307,101 @@ async buildPayloads() {
     return payloads;
 
 }
+// ==================================================
+// Test Sync (No Date Filter)
+// ==================================================
+async testRunSync() {
+
+    try {
+
+        console.log("==========================================");
+        console.log("TEST SYNC STARTED");
+        console.log("==========================================");
+
+        // Fetch ALL completed requests
+        const completedRequests =
+            await c4cService.getAllCompletedServiceRequests();
+
+        if (!completedRequests.length) {
+
+            return {
+                success: true,
+                total: 0,
+                payload: []
+            };
+
+        }
+
+        const requestItems =
+            await c4cService.getServiceRequestItems();
+
+        const payload = [];
+
+        for (const request of completedRequests) {
+
+            const items = requestItems.filter(
+                item => item.ServiceRequestID == request.ID
+            );
+
+            for (const item of items) {
+
+                // Skip Commercial Settlement
+                if (item.SettlementMode_KUTText === "Commercial Settlement (CN)") {
+                    continue;
+                }
+
+                payload.push({
+
+                    Requestno: request.ID,
+
+                    SeqNo: item.ID,
+
+                    Bp: request.BuyerPartyID,
+
+                    TotalAmount: request.GrandTotalContent_KUT,
+
+                    TotCurrency: request.GrandTotalcurrencyCode_KUT,
+
+                    DistriChannel: request.DistributionChannelCode,
+
+                    Division: request.DivisionCode,
+
+                    CreationDate: request.CreationDateTime,
+
+                    ChangedDate: request.LastChangeDateTime,
+
+                    Plant: request.ServiceExecutionTeamPartyID.replace("PLANT_", ""),
+
+                    SalesOrg: request.SalesOrganisationID.replace("SO_", ""),
+
+                    Product: item.ProductID,
+
+                    Description: item.Description,
+
+                    Settlement: item.SettlementMode_KUTText,
+
+                    Amount: item.TotalAmountContent_KUT,
+
+                    Currency: item.TotalAmountcurrencyCode_KUT
+
+                });
+
+            }
+
+        }
+
+        return {
+            success: true,
+            total: payload.length,
+            payload
+        };
+
+    } catch (error) {
+
+        throw error;
+
+    }
+
+}
 }
 module.exports = new SyncService();

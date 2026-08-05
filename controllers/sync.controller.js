@@ -108,9 +108,32 @@ const getPayload = async (req, res) => {
     }
 
 };
+// ===========================================
+// Test Payload (No Date Filter)
+// GET /api/sync/test-all
+// ===========================================
+const testAllSync = async (req, res) => {
+
+    try {
+
+        const result = await syncService.testRunSync();
+
+        return res.status(200).json(result);
+
+    } catch (error) {
+
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
+
+    }
+
+};
 
 module.exports = {
     runSync,
     runCronSync,
-    getPayload
+    getPayload,
+    testAllSync
 };
